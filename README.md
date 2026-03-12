@@ -17,7 +17,7 @@ Automation workflows for [qui](https://github.com/TRaSH-Guides/qui) — a qBitto
 Import individual JSON files through the qui web UI, or use the API:
 
 ```bash
-curl -X POST http://your-qui:7474/api/instances/1/automations \
+curl -X POST "http://your-qui:7474/api/instances/${QUI_INSTANCE_ID:-1}/automations" \
   -H "X-API-Key: YOUR_KEY" \
   -H "Content-Type: application/json" \
   -d @tagging/Tag\ -\ tracker\ name.json
@@ -65,7 +65,7 @@ qui_workflows/
 | Sort | Name | Interval | Action |
 |------|------|----------|--------|
 | 2 | Resume Incomplete | 6h | Resume stopped torrents that aren't complete |
-| 3 | Resume: min seed failsafe | 30min | Resume stoppedUP torrents seeding < 15 days |
+| 3 | Resume: min seed failsafe | 30min | Resume stoppedUP torrents seeding < 15 days; resets share limits to unlimited (re-applied by later limit automations) |
 | 7 | Delete: unregistered | 15min | Delete unregistered torrents (90min age guard) |
 | 8 | Recheck: missing files | default | Force recheck on missing files |
 
@@ -76,8 +76,8 @@ qui_workflows/
 | 9 | HL-remove-limits | unlimited | unlimited | — |
 | 10 | noHL-movies-limits | 33 | 15 days | — |
 | 12 | noHL-tv-limits | unlimited | 21 days | — |
-| 14 | TL-limits | unlimited | 365 days | 25 MB/s |
-| 16 | TLnoHL-limits | unlimited | 15 days | 25 MB/s |
+| 14 | TL-limits | unlimited | 365 days | ~25 MB/s (25390 KiB/s) |
+| 16 | TLnoHL-limits | unlimited | 15 days | ~25 MB/s (25390 KiB/s) |
 | 18 | noHL-catchall-limits | 15 | 35 days | — |
 | 20 | noHL-xseed-limits | unlimited | 15 days | — |
 
@@ -124,7 +124,7 @@ Torrents are routed to rule groups based on conditions:
 ### Special Handling
 
 - **MyAnonamouse (MAM)**: Excluded from noHL tagging and catchall — seeds forever
-- **TorrentLeech (TL)**: Speed-limited to 25 MB/s upload, separate HL/noHL rules
+- **TorrentLeech (TL)**: Speed-limited to ~25 MB/s upload (25390 KiB/s), separate HL/noHL rules
 - **Cross-seeds**: Dedicated rules — seed 15 days then delete. Cross-seeds with hardlinks are naturally exempt (treated as hardlinked)
 - **All deletes**: Use `deleteWithFilesPreserveCrossSeeds` mode (except unregistered which uses `deleteWithFiles`)
 
