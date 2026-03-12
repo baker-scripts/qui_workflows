@@ -1,0 +1,44 @@
+{
+  "id": 13,
+  "name": "TL-cleanup",
+  "trackerPattern": "*",
+  "trackerDomains": [
+    "*"
+  ],
+  "conditions": {
+    "schemaVersion": "1",
+    "delete": {
+      "enabled": true,
+      "mode": "deleteWithFilesPreserveCrossSeeds",
+      "condition": {
+        "operator": "AND",
+        "conditions": [
+          {
+            "field": "TAGS",
+            "operator": "CONTAINS",
+            "value": "TorrentLeech"
+          },
+          {
+            "field": "HARDLINK_SCOPE",
+            "operator": "EQUAL",
+            "value": "outside_qbittorrent"
+          },
+          {
+            "field": "SEEDING_TIME",
+            "operator": "GREATER_THAN_OR_EQUAL",
+            "value": "31536000"
+          },
+          {
+            "field": "CATEGORY",
+            "operator": "NOT_CONTAINS",
+            "value": "cross"
+          }
+        ]
+      }
+    }
+  },
+  "enabled": true,
+  "dryRun": false,
+  "sortOrder": 15,
+  "intervalSeconds": 3600
+}

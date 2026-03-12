@@ -1,0 +1,7 @@
+# Gitleaks configuration
+# https://github.com/gitleaks/gitleaks
+
+title = "qui_workflows gitleaks config"
+
+[allowlist]
+  description = "Global allowlist"

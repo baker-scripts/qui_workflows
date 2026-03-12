@@ -1,0 +1,64 @@
+{
+  "id": 12,
+  "name": "noHL-tv-cleanup",
+  "trackerPattern": "*",
+  "trackerDomains": [
+    "*"
+  ],
+  "conditions": {
+    "schemaVersion": "1",
+    "delete": {
+      "enabled": true,
+      "mode": "deleteWithFilesPreserveCrossSeeds",
+      "condition": {
+        "operator": "AND",
+        "conditions": [
+          {
+            "field": "HARDLINK_SCOPE",
+            "operator": "NOT_EQUAL",
+            "value": "outside_qbittorrent"
+          },
+          {
+            "field": "CATEGORY",
+            "operator": "CONTAINS",
+            "value": "tv"
+          },
+          {
+            "field": "TAGS",
+            "operator": "NOT_CONTAINS",
+            "value": "TorrentLeech"
+          },
+          {
+            "field": "SEEDING_TIME",
+            "operator": "GREATER_THAN_OR_EQUAL",
+            "value": "1296000"
+          },
+          {
+            "operator": "OR",
+            "conditions": [
+              {
+                "field": "RATIO",
+                "operator": "GREATER_THAN_OR_EQUAL",
+                "value": "3"
+              },
+              {
+                "field": "SEEDING_TIME",
+                "operator": "GREATER_THAN_OR_EQUAL",
+                "value": "1814400"
+              }
+            ]
+          },
+          {
+            "field": "CATEGORY",
+            "operator": "NOT_CONTAINS",
+            "value": "cross"
+          }
+        ]
+      }
+    }
+  },
+  "enabled": true,
+  "dryRun": false,
+  "sortOrder": 13,
+  "intervalSeconds": 3600
+}

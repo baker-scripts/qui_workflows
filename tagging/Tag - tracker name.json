@@ -1,0 +1,31 @@
+{
+  "id": 16,
+  "name": "Tag: tracker name",
+  "trackerPattern": "*",
+  "trackerDomains": [
+    "*"
+  ],
+  "conditions": {
+    "schemaVersion": "1",
+    "tag": {
+      "enabled": true,
+      "tags": [],
+      "mode": "full",
+      "useTrackerAsTag": true,
+      "useDisplayName": true
+    },
+    "tags": [
+      {
+        "enabled": true,
+        "tags": [],
+        "mode": "full",
+        "useTrackerAsTag": true,
+        "useDisplayName": true
+      }
+    ]
+  },
+  "enabled": true,
+  "dryRun": false,
+  "sortOrder": 1,
+  "intervalSeconds": 1800
+}

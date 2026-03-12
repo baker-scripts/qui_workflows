@@ -1,0 +1,51 @@
+{
+  "id": 17,
+  "name": "Tag: stalledDL",
+  "trackerPattern": "*",
+  "trackerDomains": [
+    "*"
+  ],
+  "conditions": {
+    "schemaVersion": "1",
+    "tag": {
+      "enabled": true,
+      "tags": [
+        "stalledDL"
+      ],
+      "mode": "full",
+      "condition": {
+        "operator": "AND",
+        "conditions": [
+          {
+            "field": "STATE",
+            "operator": "EQUAL",
+            "value": "stalled_downloading"
+          }
+        ]
+      }
+    },
+    "tags": [
+      {
+        "enabled": true,
+        "tags": [
+          "stalledDL"
+        ],
+        "mode": "full",
+        "condition": {
+          "operator": "AND",
+          "conditions": [
+            {
+              "field": "STATE",
+              "operator": "EQUAL",
+              "value": "stalled_downloading"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "enabled": true,
+  "dryRun": false,
+  "sortOrder": 5,
+  "intervalSeconds": 1800
+}

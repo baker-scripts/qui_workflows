@@ -1,0 +1,63 @@
+{
+  "id": 21,
+  "name": "Resume: min seed failsafe",
+  "trackerPattern": "*",
+  "trackerDomains": [
+    "*"
+  ],
+  "conditions": {
+    "schemaVersion": "1",
+    "shareLimits": {
+      "enabled": true,
+      "ratioLimit": -1,
+      "seedingTimeMinutes": -1,
+      "condition": {
+        "operator": "AND",
+        "conditions": [
+          {
+            "field": "STATE",
+            "operator": "NOT_EQUAL",
+            "value": "downloading"
+          },
+          {
+            "field": "SEEDING_TIME",
+            "operator": "LESS_THAN",
+            "value": "1296000"
+          },
+          {
+            "field": "STATE",
+            "operator": "NOT_EQUAL",
+            "value": "active"
+          }
+        ]
+      }
+    },
+    "resume": {
+      "enabled": true,
+      "condition": {
+        "operator": "AND",
+        "conditions": [
+          {
+            "field": "STATE",
+            "operator": "NOT_EQUAL",
+            "value": "downloading"
+          },
+          {
+            "field": "SEEDING_TIME",
+            "operator": "LESS_THAN",
+            "value": "1296000"
+          },
+          {
+            "field": "STATE",
+            "operator": "NOT_EQUAL",
+            "value": "active"
+          }
+        ]
+      }
+    }
+  },
+  "enabled": true,
+  "dryRun": false,
+  "sortOrder": 3,
+  "intervalSeconds": 1800
+}

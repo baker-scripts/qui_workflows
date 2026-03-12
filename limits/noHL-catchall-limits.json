@@ -1,0 +1,55 @@
+{
+  "id": 10,
+  "name": "noHL-catchall-limits",
+  "trackerPattern": "*",
+  "trackerDomains": [
+    "*"
+  ],
+  "conditions": {
+    "schemaVersion": "1",
+    "shareLimits": {
+      "enabled": true,
+      "ratioLimit": 15,
+      "seedingTimeMinutes": 50400,
+      "condition": {
+        "operator": "AND",
+        "conditions": [
+          {
+            "field": "HARDLINK_SCOPE",
+            "operator": "NOT_EQUAL",
+            "value": "outside_qbittorrent"
+          },
+          {
+            "field": "TRACKER",
+            "operator": "NOT_CONTAINS",
+            "value": "myanonamouse"
+          },
+          {
+            "field": "CATEGORY",
+            "operator": "NOT_CONTAINS",
+            "value": "movie"
+          },
+          {
+            "field": "CATEGORY",
+            "operator": "NOT_CONTAINS",
+            "value": "tv"
+          },
+          {
+            "field": "TAGS",
+            "operator": "NOT_CONTAINS",
+            "value": "TorrentLeech"
+          },
+          {
+            "field": "CATEGORY",
+            "operator": "NOT_CONTAINS",
+            "value": "cross"
+          }
+        ]
+      }
+    }
+  },
+  "enabled": true,
+  "dryRun": false,
+  "sortOrder": 18,
+  "intervalSeconds": 3600
+}

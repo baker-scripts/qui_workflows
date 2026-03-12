@@ -1,0 +1,35 @@
+{
+  "id": 22,
+  "name": "noHL-xseed-limits",
+  "trackerPattern": "*",
+  "trackerDomains": [
+    "*"
+  ],
+  "conditions": {
+    "schemaVersion": "1",
+    "shareLimits": {
+      "enabled": true,
+      "ratioLimit": -1,
+      "seedingTimeMinutes": 21600,
+      "condition": {
+        "operator": "AND",
+        "conditions": [
+          {
+            "field": "HARDLINK_SCOPE",
+            "operator": "NOT_EQUAL",
+            "value": "outside_qbittorrent"
+          },
+          {
+            "field": "CATEGORY",
+            "operator": "CONTAINS",
+            "value": "cross"
+          }
+        ]
+      }
+    }
+  },
+  "enabled": true,
+  "dryRun": false,
+  "sortOrder": 20,
+  "intervalSeconds": 3600
+}

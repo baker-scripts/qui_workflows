@@ -1,0 +1,18 @@
+language: en-US
+reviews:
+  profile: assertive
+  request_changes_workflow: true
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+  path_instructions:
+    - path: "**/*.json"
+      instructions: |
+        These are qui automation exports. Validate:
+        - conditions schema is well-formed (AND/OR operators, valid fields)
+        - share limits use correct units (seedingTimeMinutes, ratioLimit)
+        - delete modes are valid (deleteWithFiles, deleteWithFilesPreserveCrossSeeds, etc.)
+        - no instance-specific fields (instanceId, createdAt, updatedAt)
+chat:
+  auto_reply: true

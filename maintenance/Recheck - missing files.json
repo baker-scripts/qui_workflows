@@ -1,0 +1,14 @@
+{
+  "id": 20,
+  "name": "Recheck: missing files",
+  "trackerPattern": "*",
+  "trackerDomains": [
+    "*"
+  ],
+  "conditions": {
+    "schemaVersion": "1"
+  },
+  "enabled": true,
+  "dryRun": false,
+  "sortOrder": 8
+}

@@ -1,0 +1,33 @@
+{
+  "id": 1,
+  "name": "Resume Incomplete",
+  "trackerPattern": "*",
+  "trackerDomains": [
+    "*"
+  ],
+  "conditions": {
+    "schemaVersion": "1",
+    "resume": {
+      "enabled": true,
+      "condition": {
+        "operator": "AND",
+        "conditions": [
+          {
+            "field": "PROGRESS",
+            "operator": "LESS_THAN",
+            "value": "1"
+          },
+          {
+            "field": "STATE",
+            "operator": "EQUAL",
+            "value": "stopped"
+          }
+        ]
+      }
+    }
+  },
+  "enabled": true,
+  "dryRun": false,
+  "sortOrder": 2,
+  "intervalSeconds": 21600
+}
