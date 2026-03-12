@@ -1,0 +1,28 @@
+name: JSON Lint
+
+on:
+  push:
+    paths:
+      - "**/*.json"
+  pull_request:
+    paths:
+      - "**/*.json"
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate JSON files
+        run: |
+          failed=0
+          while IFS= read -r -d '' file; do
+            if ! python3 -m json.tool "$file" > /dev/null 2>&1; then
+              printf "Invalid JSON: %s\n" "$file"
+              failed=1
+            fi
+          done < <(find . -name '*.json' -not -path './.git/*' -print0)
+          if [[ "$failed" -eq 1 ]]; then
+            exit 1
+          fi
+          printf "All JSON files valid\n"

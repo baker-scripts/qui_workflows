@@ -1,0 +1,80 @@
+name: Bug Report
+description: Report a bug with an automation workflow
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Fill out all required fields.** Incomplete reports will be closed.
+  - type: dropdown
+    id: category
+    attributes:
+      label: Automation category
+      options:
+        - Tagging
+        - Maintenance
+        - Share limits
+        - Cleanup
+        - Export script
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: automation-name
+    attributes:
+      label: Automation name
+      description: Exact name from the JSON filename or qui UI.
+      placeholder: "Tag - tracker name"
+    validations:
+      required: true
+  - type: input
+    id: qui-version
+    attributes:
+      label: qui version
+      placeholder: "1.2.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: qui-branch
+    attributes:
+      label: qui branch
+      options:
+        - master / main
+        - develop
+        - nightly
+        - N/A
+    validations:
+      required: true
+  - type: input
+    id: qbit-version
+    attributes:
+      label: qBittorrent version
+      placeholder: "5.0.4"
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: conditions
+    attributes:
+      label: Current automation JSON
+      description: Paste the automation config from qui or the JSON file. Redact any secrets.
+      render: json
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: qui logs
+      description: Relevant log output from qui showing the issue.
+      render: text
