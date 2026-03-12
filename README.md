@@ -201,6 +201,10 @@ Issues identified during review (documented, not yet applied):
 - [baker-scripts/StarrScripts](https://github.com/baker-scripts/StarrScripts) — includes `qui-xseed.sh` for cross-seed automation
 - [TRaSH-Guides/qui_workflows](https://github.com/TRaSH-Guides/qui_workflows) — TRaSH's tier-based reference implementation
 
+## Disclaimer
+
+These automations are provided as-is with no warranty. They **will delete torrents and files** based on the configured conditions. Always review the JSON conditions before importing and test with `dryRun: true` first. The authors are not responsible for any data loss resulting from the use of these workflows.
+
 ## License
 
 [MIT](LICENSE)
