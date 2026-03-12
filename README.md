@@ -7,7 +7,7 @@ Automation workflows for [qui](https://github.com/TRaSH-Guides/qui) — a qBitto
 ## Requirements
 
 - [qui](https://github.com/TRaSH-Guides/qui) instance with API access
-- qBittorrent with hardlink detection enabled
+- qBittorrent with hardlink detection enabled (save path and hardlink target on the same filesystem)
 - `curl` and `python3` (for the export script)
 
 ## Quick Start
@@ -23,6 +23,8 @@ curl -X POST "http://your-qui:7474/api/instances/${QUI_INSTANCE_ID:-1}/automatio
   -d @tagging/Tag\ -\ tracker\ name.json
 ```
 
+The `id` field in each JSON is from the source instance and will be reassigned on import. Sort order and conditions are preserved.
+
 ### Export (update from live instance)
 
 ```bash
@@ -34,7 +36,7 @@ export QUI_API_KEY="your-api-key"
 ./scripts/export.sh
 ```
 
-The export script fetches all automations from the API, strips instance-specific fields (`instanceId`, `createdAt`, `updatedAt`), and writes individual JSON files to the categorized directories.
+The export script fetches all automations from the API, strips instance-specific fields (`instanceId`, `createdAt`, `updatedAt`), and writes individual JSON files to the categorized directories. When adding new automations, update the `FILE_MAP` in the script.
 
 ## Structure
 
@@ -51,12 +53,16 @@ qui_workflows/
 
 ## Automations
 
+Limits and cleanup automations are interleaved by sort order (limits at even positions, cleanup at odd) so that each category's cleanup rule runs immediately after its limits rule.
+
+All limit and cleanup automations run on a 1-hour interval (`intervalSeconds: 3600`), except HL-remove-limits which uses qui's default interval.
+
 ### Tagging (sort 1-6)
 
 | Sort | Name | Interval | Action |
 |------|------|----------|--------|
 | 1 | Tag: tracker name | 30min | Auto-tag with tracker display name |
-| 4 | Tag: noHL | 6h | Tag `noHL` when no external hardlinks (excludes MAM, cross-seeds) |
+| 4 | noHL | 6h | Tag `noHL` when no external hardlinks and completed 90+ minutes ago (excludes MAM, cross-seeds) |
 | 5 | Tag: stalledDL | 30min | Tag `stalledDL` for stalled downloads |
 | 6 | Tag: tracker issue | 30min | Tag `issue` for errored/down/missing files |
 
@@ -65,9 +71,9 @@ qui_workflows/
 | Sort | Name | Interval | Action |
 |------|------|----------|--------|
 | 2 | Resume Incomplete | 6h | Resume stopped torrents that aren't complete |
-| 3 | Resume: min seed failsafe | 30min | Resume stoppedUP torrents seeding < 15 days; resets share limits to unlimited (re-applied by later limit automations) |
-| 7 | Delete: unregistered | 15min | Delete unregistered torrents (90min age guard) |
-| 8 | Recheck: missing files | default | Force recheck on missing files |
+| 3 | Resume: min seed failsafe | 30min | Resume any non-downloading, non-active torrent seeding < 15 days; also resets share limits to unlimited (re-applied by later limit automations) |
+| 7 | Delete: unregistered | 15min | Delete unregistered torrents (90min age guard, tracker not down) |
+| 8 | Recheck: missing files | default | Built-in qui action — rechecks torrents with missing files (empty conditions is intentional) |
 
 ### Limits (sort 9-20)
 
@@ -109,35 +115,43 @@ Delete automations **cannot combine** with other actions. Each delete rule is a 
 
 ### Category Routing
 
-Torrents are routed to rule groups based on conditions:
+Torrents are routed to rule groups based on conditions. Routing uses `HARDLINK_SCOPE` directly (not the `noHL` tag), so it applies immediately without waiting for the 90-minute tagging grace period.
 
 | Condition | Group |
 |-----------|-------|
-| Hardlinked + not TL + not cross-seed | HL (remove limits, seed forever) |
-| `CATEGORY CONTAINS movie` + noHL | Movies |
-| `CATEGORY CONTAINS tv` + noHL | TV |
+| `HARDLINK_SCOPE = outside_qbittorrent` + not TL + not cross-seed | HL (remove limits, seed forever) |
+| `CATEGORY CONTAINS movie` + not hardlinked + not TL + not cross-seed | Movies |
+| `CATEGORY CONTAINS tv` + not hardlinked + not TL + not cross-seed | TV |
 | `TAGS CONTAINS TorrentLeech` + hardlinked | TL |
-| `TAGS CONTAINS TorrentLeech` + noHL | TLnoHL |
-| `CATEGORY CONTAINS cross` + noHL | Cross-seed |
-| Everything else (noHL, not MAM/TL) | Catchall |
+| `TAGS CONTAINS TorrentLeech` + not hardlinked | TLnoHL |
+| `CATEGORY CONTAINS cross` + not hardlinked | Cross-seed |
+| Not hardlinked + not MAM + not TL + not movie + not tv + not cross | Catchall |
 
 ### Special Handling
 
 - **MyAnonamouse (MAM)**: Excluded from noHL tagging and catchall — seeds forever
 - **TorrentLeech (TL)**: Speed-limited to ~25 MB/s upload (25390 KiB/s), separate HL/noHL rules
 - **Cross-seeds**: Dedicated rules — seed 15 days then delete. Cross-seeds with hardlinks are naturally exempt (treated as hardlinked)
-- **All deletes**: Use `deleteWithFilesPreserveCrossSeeds` mode (except unregistered which uses `deleteWithFiles`)
+- **All deletes**: Use `deleteWithFilesPreserveCrossSeeds` mode — deletes the torrent but preserves files if a cross-seed instance references them. Exception: unregistered uses `deleteWithFiles` (no cross-seed check since the torrent is already dead on the tracker)
 
 ### Resume Failsafe
 
-The "Resume: min seed failsafe" (sort 3) catches torrents that get paused prematurely. It resumes any stoppedUP torrent that has been seeding less than 15 days.
+The "Resume: min seed failsafe" (sort 3) catches torrents that get paused or stopped prematurely. It resumes any torrent that is not downloading, not active, and has been seeding less than 15 days.
 
 **Important**: Cleanup guards should be <= the failsafe threshold to prevent stuck torrents in the gap between guard and failsafe.
 
+### Conditions Schema
+
+The `tag` and `tags` fields in tagging automations contain identical conditions — this is a qui schema requirement (both must be present and match). The `conditions.schemaVersion` field is always `"1"`.
+
 ## Time Reference
 
-| Value | Human |
-|-------|-------|
+### Condition values (seconds)
+
+Used in `SEEDING_TIME`, `ADDED_ON_AGE`, `COMPLETION_ON` condition fields:
+
+| Seconds | Human |
+|---------|-------|
 | 900 | 15 minutes |
 | 1800 | 30 minutes |
 | 5400 | 90 minutes |
@@ -149,7 +163,18 @@ The "Resume: min seed failsafe" (sort 3) catches torrents that get paused premat
 | 3024000 | 35 days |
 | 31536000 | 365 days |
 
-Note: `shareLimits.seedingTimeMinutes` uses **minutes**, while condition `SEEDING_TIME` values are in **seconds**.
+### Share limit values (minutes)
+
+Used in `shareLimits.seedingTimeMinutes`:
+
+| Minutes | Human |
+|---------|-------|
+| 21600 | 15 days |
+| 30240 | 21 days |
+| 50400 | 35 days |
+| 525600 | 365 days |
+
+**Warning**: Condition fields use **seconds** while `seedingTimeMinutes` uses **minutes**. Mixing these up is an easy mistake that results in dramatically wrong behavior.
 
 ## Known Differences from TRaSH Workflows
 
@@ -167,7 +192,7 @@ Issues identified during review (documented, not yet applied):
 
 1. **noHL-movies-cleanup redundant OR**: Guard `seed >= 15d` + trigger `ratio >= 33 OR seed >= 15d` — the seed branch is always true when the guard passes, making ratio irrelevant. Every noHL movie deletes at exactly 15d.
 
-2. **TLnoHL-cleanup guard/trigger mismatch**: Guard is `seed >= 15d` but OR fallback is `seed >= 12d`. The 12d branch can never fire because the 15d guard blocks it. Guard should be `seed >= 12d` to match.
+2. **TLnoHL-cleanup guard/trigger mismatch**: Guard is `seed >= 15d` but OR fallback is `seed >= 12d`. The 12d branch can never fire because the 15d guard blocks it. Either lower the guard to `seed >= 12d` (earliest delete at 12d) or raise the OR fallback to `seed >= 15d` (earliest delete at ratio OR 15d).
 
 3. Consider adding stalled download cleanup and problem cross-seed detection per TRaSH patterns.
 
