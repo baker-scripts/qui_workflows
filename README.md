@@ -204,7 +204,7 @@ Issues identified during review (documented, not yet applied):
 ## Contributors
 
 <a href="https://github.com/baker-scripts/qui_workflows/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=baker-scripts/qui_workflows" />
+  <img src="https://contrib.rocks/image?repo=baker-scripts/qui_workflows" alt="Contributors" />
 </a>
 
 ## Disclaimer
