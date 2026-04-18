@@ -29,8 +29,14 @@ else
 fi
 
 # Verify dependencies
-command -v curl >/dev/null 2>&1 || { printf "curl required\n" >&2; exit 1; }
-command -v python3 >/dev/null 2>&1 || { printf "python3 required\n" >&2; exit 1; }
+command -v curl >/dev/null 2>&1 || {
+  printf "curl required\n" >&2
+  exit 1
+}
+command -v python3 >/dev/null 2>&1 || {
+  printf "python3 required\n" >&2
+  exit 1
+}
 
 readonly QUI_INSTANCE_ID="${QUI_INSTANCE_ID:-1}"
 readonly API_ENDPOINT="${QUI_URL}/api/instances/${QUI_INSTANCE_ID}/automations"
