@@ -18,7 +18,7 @@ QUI automation workflows for qBittorrent torrent lifecycle management.
 ## Live Instance
 
 - Container: `qui.internal` (ghcr.io/hotio/qui) on hetzner, port 7476
-- Auth: OIDC-only (`QUI__OIDC_DISABLE_BUILT_IN_LOGIN=true`) — no built-in login, no plain API key
+- Auth: OIDC-only (`QUI__OIDC_DISABLE_BUILT_IN_LOGIN=true`) — no built-in username/password login; API keys are still generated via the UI (see below)
 - Export script (`scripts/export.sh`) requires `QUI_API_KEY`; generate one via qui Settings → API Keys
 - FILE_MAP IDs in export.sh match the live instance (verified 2026-06-21)
 - Predecessor repo `bakerboy448/qui-automations` is archived; this repo is canonical
