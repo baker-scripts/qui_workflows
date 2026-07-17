@@ -3,10 +3,7 @@
 QUI automation workflows for qBittorrent torrent lifecycle management.
 
 ## Structure
-- `tagging/` — tracker name, noHL, stalledDL, tracker issue tagging
-- `maintenance/` — resume, delete unregistered, recheck missing
-- `limits/` — share limits and speed limits by category
-- `cleanup/` — delete rules by category with guards
+- `qbit/` — all 21 automations (tagging, maintenance, limits, cleanup), published by qui-sync
 
 ## Rules
 - JSON files are qui automation exports (strip `instanceId`, `createdAt`, `updatedAt`)
@@ -19,8 +16,7 @@ QUI automation workflows for qBittorrent torrent lifecycle management.
 
 - Container: `qui.internal` (ghcr.io/hotio/qui) on hetzner, port 7476
 - Auth: OIDC-only (`QUI__OIDC_DISABLE_BUILT_IN_LOGIN=true`) — no built-in username/password login; API keys are still generated via the UI (see below)
-- Export script (`scripts/export.sh`) requires `QUI_API_KEY`; generate one via qui Settings → API Keys
-- FILE_MAP IDs in export.sh match the live instance (verified 2026-06-21)
+- Published by a running [qui-sync](https://github.com/ProphetSe7en/qui-sync) instance (`qui-sync.internal` on hetzner, 127.0.0.1:6070 only, no public vhost) — not a manual script. `scripts/export.sh` is retired (removed 2026-07-17).
 - Predecessor repo `bakerboy448/qui-automations` is archived; this repo is canonical
 
 ## Known Live Drift (as of 2026-06-21)

@@ -1,14 +1,13 @@
 # qui_workflows
 
-Automation workflows for [qui](https://github.com/TRaSH-Guides/qui) — a qBittorrent automation manager. These workflows manage the complete torrent lifecycle: tagging, maintenance, share limits, and cleanup.
+Automation workflows for [qui](https://github.com/autobrr/qui) — a qBittorrent automation manager. These workflows manage the complete torrent lifecycle: tagging, maintenance, share limits, and cleanup.
 
-21 automations organized by function, designed for a hardlink-aware setup with cross-seed support.
+21 automations, published and kept in sync by [qui-sync](https://github.com/ProphetSe7en/qui-sync), designed for a hardlink-aware setup with cross-seed support.
 
 ## Requirements
 
-- [qui](https://github.com/TRaSH-Guides/qui) instance with API access
+- [qui](https://github.com/autobrr/qui) instance with API access
 - qBittorrent with hardlink detection enabled (save path and hardlink target on the same filesystem)
-- `curl` and `python3` (for the export script)
 
 ## Quick Start
 
@@ -20,34 +19,20 @@ Import individual JSON files through the qui web UI, or use the API:
 curl -X POST "http://your-qui:7474/api/instances/${QUI_INSTANCE_ID:-1}/automations" \
   -H "X-API-Key: YOUR_KEY" \
   -H "Content-Type: application/json" \
-  -d @tagging/Tag\ -\ tracker\ name.json
+  -d @qbit/Tag\ tracker\ name.json
 ```
 
 The `id` field in each JSON is from the source instance and will be reassigned on import. Sort order and conditions are preserved.
 
 ### Export (update from live instance)
 
-```bash
-# Set your qui URL and API key
-export QUI_URL="http://your-qui:7474"
-export QUI_API_KEY="your-api-key"
-
-# Run the export script
-./scripts/export.sh
-```
-
-The export script fetches all automations from the API, strips instance-specific fields (`instanceId`, `createdAt`, `updatedAt`), and writes individual JSON files to the categorized directories. When adding new automations, update the `FILE_MAP` in the script.
+This repo is published by a running [qui-sync](https://github.com/ProphetSe7en/qui-sync) instance, not a manual script. To update it: open qui-sync's Export tab, review the diff, and click Commit export, then Push to remote. See qui-sync's [How-To Guide](https://github.com/ProphetSe7en/qui-sync/blob/main/docs/how-to.md#export) for the full flow.
 
 ## Structure
 
 ```
 qui_workflows/
-├── tagging/           # Tracker name, noHL, stalledDL, tracker issue
-├── maintenance/       # Resume, delete unregistered, recheck missing
-├── limits/            # Share limits and speed limits by category
-├── cleanup/           # Delete rules by category with guards
-├── scripts/
-│   └── export.sh      # Export automations from live instance
+├── qbit/               # All 21 automations, published by qui-sync
 └── README.md
 ```
 
@@ -178,7 +163,7 @@ Used in `shareLimits.seedingTimeMinutes`:
 
 ## Known Differences from TRaSH Workflows
 
-This setup uses **category-based routing** (movies/tv/TL/catchall) while [TRaSH's workflows](https://github.com/TRaSH-Guides/qui_workflows) use **tracker-tier-based routing** (Tier 1/2/3). Neither approach is wrong — they reflect different philosophies.
+This setup uses **category-based routing** (movies/tv/TL/catchall) while [TRaSH's workflows](https://github.com/TRaSH-/qui_workflows) use **tracker-tier-based routing** (Tier 1/2/3). Neither approach is wrong — they reflect different philosophies.
 
 Key differences:
 - **No tier system**: We route by category + tracker tag rather than tracker tier
@@ -199,7 +184,7 @@ Issues identified during review (documented, not yet applied):
 ## Related
 
 - [baker-scripts/StarrScripts](https://github.com/baker-scripts/StarrScripts) — includes `qui-xseed.sh` for cross-seed automation
-- [TRaSH-Guides/qui_workflows](https://github.com/TRaSH-Guides/qui_workflows) — TRaSH's tier-based reference implementation
+- [TRaSH-/qui_workflows](https://github.com/TRaSH-/qui_workflows) — TRaSH's tier-based reference implementation
 
 ## Contributors
 
