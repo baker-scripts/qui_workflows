@@ -1,0 +1,51 @@
+{
+  "_slug": "resume-min-seed-failsafe",
+  "name": "Resume: min seed failsafe",
+  "trackerPattern": "*",
+  "trackerDomains": [
+    "*"
+  ],
+  "conditions": {
+    "schemaVersion": "1",
+    "resume": {
+      "enabled": true,
+      "condition": {
+        "operator": "AND",
+        "conditions": [
+          {
+            "field": "STATE",
+            "operator": "NOT_EQUAL",
+            "value": "downloading"
+          },
+          {
+            "field": "SEEDING_TIME",
+            "operator": "LESS_THAN",
+            "value": "1296000"
+          },
+          {
+            "operator": "AND",
+            "conditions": [
+              {
+                "field": "STATE",
+                "operator": "NOT_EQUAL",
+                "value": "active"
+              },
+              {
+                "field": "STATE",
+                "operator": "NOT_EQUAL",
+                "value": "stalled_uploading"
+              },
+              {
+                "field": "STATE",
+                "operator": "NOT_EQUAL",
+                "value": "uploading"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "intervalSeconds": 1800,
+  "sortOrder": 3
+}

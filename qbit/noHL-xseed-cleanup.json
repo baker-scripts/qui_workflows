@@ -1,0 +1,37 @@
+{
+  "_slug": "nohl-xseed-cleanup",
+  "name": "noHL-xseed-cleanup",
+  "trackerPattern": "*",
+  "trackerDomains": [
+    "*"
+  ],
+  "conditions": {
+    "schemaVersion": "1",
+    "delete": {
+      "enabled": true,
+      "mode": "deleteWithFilesPreserveCrossSeeds",
+      "condition": {
+        "operator": "AND",
+        "conditions": [
+          {
+            "field": "HARDLINK_SCOPE",
+            "operator": "NOT_EQUAL",
+            "value": "outside_qbittorrent"
+          },
+          {
+            "field": "CATEGORY",
+            "operator": "CONTAINS",
+            "value": "cross"
+          },
+          {
+            "field": "SEEDING_TIME",
+            "operator": "GREATER_THAN_OR_EQUAL",
+            "value": "1296000"
+          }
+        ]
+      }
+    }
+  },
+  "intervalSeconds": 3600,
+  "sortOrder": 21
+}

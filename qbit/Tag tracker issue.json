@@ -1,0 +1,69 @@
+{
+  "_slug": "tag-tracker-issue",
+  "name": "Tag: tracker issue",
+  "trackerPattern": "*",
+  "trackerDomains": [
+    "*"
+  ],
+  "conditions": {
+    "schemaVersion": "1",
+    "tag": {
+      "enabled": true,
+      "tags": [
+        "issue"
+      ],
+      "mode": "full",
+      "condition": {
+        "operator": "OR",
+        "conditions": [
+          {
+            "field": "STATE",
+            "operator": "EQUAL",
+            "value": "errored"
+          },
+          {
+            "field": "STATE",
+            "operator": "EQUAL",
+            "value": "tracker_down"
+          },
+          {
+            "field": "STATE",
+            "operator": "EQUAL",
+            "value": "missingFiles"
+          }
+        ]
+      }
+    },
+    "tags": [
+      {
+        "enabled": true,
+        "tags": [
+          "issue"
+        ],
+        "mode": "full",
+        "condition": {
+          "operator": "OR",
+          "conditions": [
+            {
+              "field": "STATE",
+              "operator": "EQUAL",
+              "value": "errored"
+            },
+            {
+              "field": "STATE",
+              "operator": "EQUAL",
+              "value": "tracker_down"
+            },
+            {
+              "field": "STATE",
+              "operator": "EQUAL",
+              "value": "missingFiles"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "intervalSeconds": 1800,
+  "sortOrder": 6
+}

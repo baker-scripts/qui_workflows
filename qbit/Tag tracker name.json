@@ -1,0 +1,29 @@
+{
+  "_slug": "tag-tracker-name",
+  "name": "Tag: tracker name",
+  "trackerPattern": "*",
+  "trackerDomains": [
+    "*"
+  ],
+  "conditions": {
+    "schemaVersion": "1",
+    "tag": {
+      "enabled": true,
+      "tags": [],
+      "mode": "full",
+      "useTrackerAsTag": true,
+      "useDisplayName": true
+    },
+    "tags": [
+      {
+        "enabled": true,
+        "tags": [],
+        "mode": "full",
+        "useTrackerAsTag": true,
+        "useDisplayName": true
+      }
+    ]
+  },
+  "intervalSeconds": 1800,
+  "sortOrder": 1
+}

@@ -1,0 +1,79 @@
+{
+  "_slug": "nohl",
+  "name": "noHL",
+  "trackerPattern": "*",
+  "trackerDomains": [
+    "*"
+  ],
+  "conditions": {
+    "schemaVersion": "1",
+    "tag": {
+      "enabled": true,
+      "tags": [
+        "noHL"
+      ],
+      "mode": "full",
+      "condition": {
+        "operator": "AND",
+        "conditions": [
+          {
+            "field": "HARDLINK_SCOPE",
+            "operator": "NOT_EQUAL",
+            "value": "outside_qbittorrent"
+          },
+          {
+            "field": "TRACKER",
+            "operator": "NOT_CONTAINS",
+            "value": "myanonamouse"
+          },
+          {
+            "field": "COMPLETION_ON",
+            "operator": "GREATER_THAN_OR_EQUAL",
+            "value": "5400"
+          },
+          {
+            "field": "CATEGORY",
+            "operator": "NOT_CONTAINS",
+            "value": "cross"
+          }
+        ]
+      }
+    },
+    "tags": [
+      {
+        "enabled": true,
+        "tags": [
+          "noHL"
+        ],
+        "mode": "full",
+        "condition": {
+          "operator": "AND",
+          "conditions": [
+            {
+              "field": "HARDLINK_SCOPE",
+              "operator": "NOT_EQUAL",
+              "value": "outside_qbittorrent"
+            },
+            {
+              "field": "TRACKER",
+              "operator": "NOT_CONTAINS",
+              "value": "myanonamouse"
+            },
+            {
+              "field": "COMPLETION_ON",
+              "operator": "GREATER_THAN_OR_EQUAL",
+              "value": "5400"
+            },
+            {
+              "field": "CATEGORY",
+              "operator": "NOT_CONTAINS",
+              "value": "cross"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "intervalSeconds": 21600,
+  "sortOrder": 4
+}

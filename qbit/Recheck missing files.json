@@ -1,0 +1,13 @@
+{
+  "_slug": "recheck-missing-files",
+  "name": "Recheck: missing files",
+  "trackerPattern": "*",
+  "trackerDomains": [
+    "*"
+  ],
+  "conditions": {
+    "schemaVersion": "1"
+  },
+  "intervalSeconds": 3600,
+  "sortOrder": 8
+}

@@ -1,0 +1,63 @@
+{
+  "_slug": "tl-limits",
+  "name": "TL-limits",
+  "trackerPattern": "*",
+  "trackerDomains": [
+    "*"
+  ],
+  "conditions": {
+    "schemaVersion": "1",
+    "speedLimits": {
+      "enabled": true,
+      "uploadKiB": 25390,
+      "downloadKiB": 0,
+      "condition": {
+        "operator": "AND",
+        "conditions": [
+          {
+            "field": "TAGS",
+            "operator": "CONTAINS",
+            "value": "TorrentLeech"
+          },
+          {
+            "field": "HARDLINK_SCOPE",
+            "operator": "EQUAL",
+            "value": "outside_qbittorrent"
+          },
+          {
+            "field": "CATEGORY",
+            "operator": "NOT_CONTAINS",
+            "value": "cross"
+          }
+        ]
+      }
+    },
+    "shareLimits": {
+      "enabled": true,
+      "ratioLimit": -1,
+      "seedingTimeMinutes": 525600,
+      "condition": {
+        "operator": "AND",
+        "conditions": [
+          {
+            "field": "TAGS",
+            "operator": "CONTAINS",
+            "value": "TorrentLeech"
+          },
+          {
+            "field": "HARDLINK_SCOPE",
+            "operator": "EQUAL",
+            "value": "outside_qbittorrent"
+          },
+          {
+            "field": "CATEGORY",
+            "operator": "NOT_CONTAINS",
+            "value": "cross"
+          }
+        ]
+      }
+    }
+  },
+  "intervalSeconds": 3600,
+  "sortOrder": 14
+}
