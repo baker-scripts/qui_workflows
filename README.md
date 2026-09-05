@@ -1,5 +1,7 @@
 # qui_workflows
 
+[![JSON Lint](https://github.com/baker-scripts/qui_workflows/actions/workflows/json-lint.yml/badge.svg)](https://github.com/baker-scripts/qui_workflows/actions/workflows/json-lint.yml)
+
 Automation workflows for [qui](https://github.com/autobrr/qui) — a qBittorrent automation manager. These workflows manage the complete torrent lifecycle: tagging, maintenance, share limits, and cleanup.
 
 21 automations, published and kept in sync by [qui-sync](https://github.com/ProphetSe7en/qui-sync), designed for a hardlink-aware setup with cross-seed support.
@@ -185,6 +187,10 @@ Issues identified during review (documented, not yet applied):
 
 - [baker-scripts/StarrScripts](https://github.com/baker-scripts/StarrScripts) — includes `qui-xseed.sh` for cross-seed automation
 - [TRaSH-/qui_workflows](https://github.com/TRaSH-/qui_workflows) — TRaSH's tier-based reference implementation
+
+## Contributing
+
+Issues and pull requests welcome. See the [contributing guidelines](https://github.com/baker-scripts/.github/blob/main/CONTRIBUTING.md); [open an issue](https://github.com/baker-scripts/qui_workflows/issues) to discuss larger changes.
 
 ## Contributors
 
