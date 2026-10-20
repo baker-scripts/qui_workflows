@@ -2,205 +2,133 @@
 
 [![JSON Lint](https://github.com/baker-scripts/qui_workflows/actions/workflows/json-lint.yml/badge.svg)](https://github.com/baker-scripts/qui_workflows/actions/workflows/json-lint.yml)
 
-Automation workflows for [qui](https://github.com/autobrr/qui) — a qBittorrent automation manager. These workflows manage the complete torrent lifecycle: tagging, maintenance, share limits, and cleanup.
+21 [qui](https://github.com/autobrr/qui) automations for qBittorrent: tagging, maintenance, share limits, and cleanup. Built for a hardlink-aware setup with cross-seed support. The JSON files in `qbit/` are published by [qui-sync](https://github.com/ProphetSe7en/qui-sync).
 
-21 automations, published and kept in sync by [qui-sync](https://github.com/ProphetSe7en/qui-sync), designed for a hardlink-aware setup with cross-seed support.
-
-## Requirements
-
-- [qui](https://github.com/autobrr/qui) instance with API access
-- qBittorrent with hardlink detection enabled (save path and hardlink target on the same filesystem)
+These automations delete torrents and files. Read the conditions before you import them.
 
 ## Quick Start
 
-### Import
+Requirements:
 
-Import individual JSON files through the qui web UI, or use the API:
+- A [qui](https://github.com/autobrr/qui) instance.
+- qBittorrent with hardlink detection (save path and hardlink target on the same filesystem).
 
-```bash
-curl -X POST "http://your-qui:7474/api/instances/${QUI_INSTANCE_ID:-1}/automations" \
-  -H "X-API-Key: YOUR_KEY" \
-  -H "Content-Type: application/json" \
-  -d @qbit/Tag\ tracker\ name.json
-```
+Import with qui-sync's Sync feature, which loads someone else's automations repo into your qui instance. See the qui-sync [How-To Guide](https://github.com/ProphetSe7en/qui-sync/blob/main/docs/how-to.md#sync).
 
-The `id` field in each JSON is from the source instance and will be reassigned on import. Sort order and conditions are preserved.
+The `id` and instance fields of your own instance are not stored in these files. Each file carries `name`, `sortOrder`, `intervalSeconds` (where set), tracker scope, and `conditions`.
 
-### Export (update from live instance)
+## Configuration
 
-This repo is published by a running [qui-sync](https://github.com/ProphetSe7en/qui-sync) instance, not a manual script. To update it: open qui-sync's Export tab, review the diff, and click Commit export, then Push to remote. See qui-sync's [How-To Guide](https://github.com/ProphetSe7en/qui-sync/blob/main/docs/how-to.md#export) for the full flow.
+There is no configuration file. Behavior is set in each JSON file under `qbit/`.
 
-## Structure
+| Field | Meaning |
+|-------|---------|
+| `sortOrder` | Execution order. Later matching automations win on conflicting share limits. |
+| `intervalSeconds` | Run interval. Omitted means qui's default. |
+| `conditions.schemaVersion` | Always `"1"`. |
+| `conditions.<action>.condition` | Match tree for `tag`, `resume`, `shareLimits`, `speedLimits`, or `delete`. |
 
-```
-qui_workflows/
-├── qbit/               # All 21 automations, published by qui-sync
-└── README.md
-```
+Condition fields use seconds (`SEEDING_TIME`, `ADDED_ON_AGE`, `COMPLETION_ON`). `shareLimits.seedingTimeMinutes` uses minutes. Mixing them up gives very wrong behavior.
 
-## Automations
+| Seconds | Human | Minutes | Human |
+|---------|-------|---------|-------|
+| 900 | 15 minutes | 21600 | 15 days |
+| 1800 | 30 minutes | 30240 | 21 days |
+| 5400 | 90 minutes | 43200 | 30 days |
+| 21600 | 6 hours | 50400 | 35 days |
+| 1296000 | 15 days | 525600 | 365 days |
+| 1814400 | 21 days | | |
+| 2592000 | 30 days | | |
+| 3024000 | 35 days | | |
+| 31536000 | 365 days | | |
 
-Limits and cleanup automations are interleaved by sort order (limits at even positions, cleanup at odd) so that each category's cleanup rule runs immediately after its limits rule.
+## Usage
 
-All limit and cleanup automations run on a 1-hour interval (`intervalSeconds: 3600`), except HL-remove-limits which uses qui's default interval.
+### Automations
 
-### Tagging (sort 1-6)
+Files in `qbit/` match the automation names. Limits and cleanup are interleaved by sort order (limits at even positions, cleanup at odd), so each cleanup rule runs right after its limits rule. All limits and cleanup automations run every hour except HL-remove-limits, which uses qui's default interval.
+
+Tagging and maintenance:
 
 | Sort | Name | Interval | Action |
 |------|------|----------|--------|
-| 1 | Tag: tracker name | 30min | Auto-tag with tracker display name |
-| 4 | noHL | 6h | Tag `noHL` when no external hardlinks and completed 90+ minutes ago (excludes MAM, cross-seeds) |
-| 5 | Tag: stalledDL | 30min | Tag `stalledDL` for stalled downloads |
-| 6 | Tag: tracker issue | 30min | Tag `issue` for errored/down/missing files |
+| 1 | Tag: tracker name | 30 min | Tag with the tracker display name |
+| 2 | Resume Incomplete | 6 h | Resume stopped torrents with progress below 100% |
+| 3 | Resume: min seed failsafe | 30 min | Resume torrents that are not downloading, active, uploading, or stalled uploading and have seeded under 15 days |
+| 4 | noHL | 6 h | Tag `noHL` when there is no hardlink outside qBittorrent, the tracker is not MyAnonamouse, the torrent completed 90+ minutes ago, and it is not a cross-seed |
+| 5 | Tag: stalledDL | 30 min | Tag `stalledDL` for stalled downloads |
+| 6 | Tag: tracker issue | 30 min | Tag `issue` for errored, tracker-down, or missing-files states |
+| 7 | Delete: unregistered | 15 min | Delete unregistered torrents when added 90+ minutes ago and the tracker is not down |
+| 8 | Recheck: missing files | 1 h | Built-in qui recheck action. Empty conditions are intentional. |
 
-### Maintenance (sort 2-8)
+Limits:
 
-| Sort | Name | Interval | Action |
-|------|------|----------|--------|
-| 2 | Resume Incomplete | 6h | Resume stopped torrents that aren't complete |
-| 3 | Resume: min seed failsafe | 30min | Resume any non-downloading, non-active torrent seeding < 15 days; also resets share limits to unlimited (re-applied by later limit automations) |
-| 7 | Delete: unregistered | 15min | Delete unregistered torrents (90min age guard, tracker not down) |
-| 8 | Recheck: missing files | default | Built-in qui action — rechecks torrents with missing files (empty conditions is intentional) |
-
-### Limits (sort 9-20)
-
-| Sort | Name | Ratio | Seed Time | Upload Cap |
+| Sort | Name | Ratio | Seed time | Upload cap |
 |------|------|-------|-----------|------------|
-| 9 | HL-remove-limits | unlimited | unlimited | — |
-| 10 | noHL-movies-limits | 33 | 15 days | — |
-| 12 | noHL-tv-limits | unlimited | 21 days | — |
-| 14 | TL-limits | unlimited | 365 days | ~25 MB/s (25390 KiB/s) |
-| 16 | TLnoHL-limits | unlimited | 15 days | ~25 MB/s (25390 KiB/s) |
-| 18 | noHL-catchall-limits | 15 | 35 days | — |
-| 20 | noHL-xseed-limits | unlimited | 15 days | — |
+| 9 | HL-remove-limits | unlimited | unlimited | none |
+| 10 | noHL-movies-limits | unlimited | 30 days | none |
+| 12 | noHL-tv-limits | unlimited | 21 days | none |
+| 14 | TL-limits | unlimited | 365 days | 25390 KiB/s |
+| 16 | TLnoHL-limits | unlimited | 30 days | 25390 KiB/s |
+| 18 | noHL-catchall-limits | unlimited | 35 days | none |
+| 20 | noHL-xseed-limits | unlimited | 15 days | none |
 
-### Cleanup (sort 11-21)
+Cleanup. Each rule has a seed-time guard, then a delete trigger:
 
-| Sort | Name | Guard | Delete Trigger |
+| Sort | Name | Guard | Delete trigger |
 |------|------|-------|----------------|
-| 11 | noHL-movies-cleanup | seed >= 15d | ratio >= 33 OR seed >= 15d |
-| 13 | noHL-tv-cleanup | seed >= 15d | ratio >= 3 OR seed >= 21d |
-| 15 | TL-cleanup | — | seed >= 365d |
-| 17 | TLnoHL-cleanup | seed >= 15d | ratio >= 1.25 OR seed >= 12d |
-| 19 | noHL-catchall-cleanup | seed >= 15d | ratio >= 15 OR seed >= 35d |
-| 21 | noHL-xseed-cleanup | — | seed >= 15d |
+| 11 | noHL-movies-cleanup | seed >= 15d | ratio >= 33 or seed >= 30d |
+| 13 | noHL-tv-cleanup | seed >= 15d | ratio >= 3 or seed >= 21d |
+| 15 | TL-cleanup | none | seed >= 365d |
+| 17 | TLnoHL-cleanup | seed >= 15d | ratio >= 1.25 or seed >= 30d |
+| 19 | noHL-catchall-cleanup | seed >= 15d | ratio >= 15 or seed >= 35d |
+| 21 | noHL-xseed-cleanup | none | seed >= 15d |
 
-## Execution Model
+### Execution model
 
-### Sort Order & Last-One-Wins
-
-All matching automations fire in `sortOrder` sequence. For conflicting share limits, **the last matching automation wins** — earlier limits get overwritten by later ones.
-
-This is why limits are ordered from most specific to least specific:
-1. HL-remove-limits (hardlinked → unlimited)
-2. Category-specific limits (movies, TV, TL)
-3. Catchall (everything else)
-
-### Delete Isolation
-
-Delete automations **cannot combine** with other actions. Each delete rule is a separate automation. Share limits + speed limits **can** combine in a single automation.
-
-### Category Routing
-
-Torrents are routed to rule groups based on conditions. Routing uses `HARDLINK_SCOPE` directly (not the `noHL` tag), so it applies immediately without waiting for the 90-minute tagging grace period.
+- Matching automations fire in `sortOrder`. For conflicting share limits, the last match wins. Limits therefore run from most specific to least specific: HL, then movies, TV, and TL, then catchall.
+- A delete action cannot combine with other actions, so each delete rule is its own automation. Share limits and speed limits can share one automation.
+- Routing uses `HARDLINK_SCOPE` directly, not the `noHL` tag, so it applies without waiting for the 90-minute tagging grace period.
+- The `tag` and `tags` fields in tagging automations hold identical conditions. qui requires both.
+- Cleanup guards should be at or below the failsafe threshold (15 days). Otherwise torrents can sit in the gap between the guard and the failsafe.
 
 | Condition | Group |
 |-----------|-------|
-| `HARDLINK_SCOPE = outside_qbittorrent` + not TL + not cross-seed | HL (remove limits, seed forever) |
-| `CATEGORY CONTAINS movie` + not hardlinked + not TL + not cross-seed | Movies |
-| `CATEGORY CONTAINS tv` + not hardlinked + not TL + not cross-seed | TV |
-| `TAGS CONTAINS TorrentLeech` + hardlinked | TL |
-| `TAGS CONTAINS TorrentLeech` + not hardlinked | TLnoHL |
-| `CATEGORY CONTAINS cross` + not hardlinked | Cross-seed |
-| Not hardlinked + not MAM + not TL + not movie + not tv + not cross | Catchall |
+| `HARDLINK_SCOPE = outside_qbittorrent`, not TL, not cross-seed | HL (remove limits) |
+| `CATEGORY CONTAINS movie`, not hardlinked, not TL, not cross-seed | Movies |
+| `CATEGORY CONTAINS tv`, not hardlinked, not TL, not cross-seed | TV |
+| `TAGS CONTAINS TorrentLeech`, hardlinked, not cross-seed | TL |
+| `TAGS CONTAINS TorrentLeech`, not hardlinked, not cross-seed | TLnoHL |
+| `CATEGORY CONTAINS cross`, not hardlinked | Cross-seed |
+| Not hardlinked, not MAM, not TL, not movie, not tv, not cross | Catchall |
 
-### Special Handling
+Special cases:
 
-- **MyAnonamouse (MAM)**: Excluded from noHL tagging and catchall — seeds forever
-- **TorrentLeech (TL)**: Speed-limited to ~25 MB/s upload (25390 KiB/s), separate HL/noHL rules
-- **Cross-seeds**: Dedicated rules — seed 15 days then delete. Cross-seeds with hardlinks are naturally exempt (treated as hardlinked)
-- **All deletes**: Use `deleteWithFilesPreserveCrossSeeds` mode — deletes the torrent but preserves files if a cross-seed instance references them. Exception: unregistered uses `deleteWithFiles` (no cross-seed check since the torrent is already dead on the tracker)
+- MyAnonamouse (MAM) is excluded from noHL tagging and from the catchall rules.
+- TorrentLeech (TL) has separate hardlinked and non-hardlinked rules and an upload cap of 25390 KiB/s.
+- Cross-seeds have dedicated rules: seed 15 days, then delete. Hardlinked cross-seeds match none of the rules.
+- Every delete uses `deleteWithFilesPreserveCrossSeeds`, which keeps files that a cross-seed still references.
 
-### Resume Failsafe
+### Updating this repo
 
-The "Resume: min seed failsafe" (sort 3) catches torrents that get paused or stopped prematurely. It resumes any torrent that is not downloading, not active, and has been seeding less than 15 days.
+A running qui-sync instance publishes this repo. Open qui-sync's Export tab, review the diff, click Commit export, then Push to remote. See the [How-To Guide](https://github.com/ProphetSe7en/qui-sync/blob/main/docs/how-to.md#export).
 
-**Important**: Cleanup guards should be <= the failsafe threshold to prevent stuck torrents in the gap between guard and failsafe.
+## Differences from TRaSH workflows
 
-### Conditions Schema
-
-The `tag` and `tags` fields in tagging automations contain identical conditions — this is a qui schema requirement (both must be present and match). The `conditions.schemaVersion` field is always `"1"`.
-
-## Time Reference
-
-### Condition values (seconds)
-
-Used in `SEEDING_TIME`, `ADDED_ON_AGE`, `COMPLETION_ON` condition fields:
-
-| Seconds | Human |
-|---------|-------|
-| 900 | 15 minutes |
-| 1800 | 30 minutes |
-| 5400 | 90 minutes |
-| 21600 | 6 hours |
-| 86400 | 1 day |
-| 1036800 | 12 days |
-| 1296000 | 15 days |
-| 1814400 | 21 days |
-| 3024000 | 35 days |
-| 31536000 | 365 days |
-
-### Share limit values (minutes)
-
-Used in `shareLimits.seedingTimeMinutes`:
-
-| Minutes | Human |
-|---------|-------|
-| 21600 | 15 days |
-| 30240 | 21 days |
-| 50400 | 35 days |
-| 525600 | 365 days |
-
-**Warning**: Condition fields use **seconds** while `seedingTimeMinutes` uses **minutes**. Mixing these up is an easy mistake that results in dramatically wrong behavior.
-
-## Known Differences from TRaSH Workflows
-
-This setup uses **category-based routing** (movies/tv/TL/catchall) while [TRaSH's workflows](https://github.com/TRaSH-/qui_workflows) use **tracker-tier-based routing** (Tier 1/2/3). Neither approach is wrong — they reflect different philosophies.
-
-Key differences:
-- **No tier system**: We route by category + tracker tag rather than tracker tier
-- **No upload speed throttling for non-TL**: TRaSH throttles Tier 2 (2 MB/s) and Tier 3 (1 MB/s) after ratio > 2.0. We only throttle TL at 25 MB/s
-- **No stalled download cleanup**: TRaSH deletes stalled downloads < 9.5% progress after 4h
-- **No problem cross-seed detection**: TRaSH tags and deletes cross-seeds that are stalled/missing after 24h
-
-## Improvement Candidates
-
-Issues identified during review (documented, not yet applied):
-
-1. **noHL-movies-cleanup redundant OR**: Guard `seed >= 15d` + trigger `ratio >= 33 OR seed >= 15d` — the seed branch is always true when the guard passes, making ratio irrelevant. Every noHL movie deletes at exactly 15d.
-
-2. **TLnoHL-cleanup guard/trigger mismatch**: Guard is `seed >= 15d` but OR fallback is `seed >= 12d`. The 12d branch can never fire because the 15d guard blocks it. Either lower the guard to `seed >= 12d` (earliest delete at 12d) or raise the OR fallback to `seed >= 15d` (earliest delete at ratio OR 15d).
-
-3. Consider adding stalled download cleanup and problem cross-seed detection per TRaSH patterns.
+[TRaSH's workflows](https://github.com/TRaSH-/qui_workflows) route by tracker tier. This repo routes by category and tracker tag. It has no tier system, no upload throttling for non-TL trackers, no stalled-download cleanup, and no problem cross-seed detection.
 
 ## Related
 
-- [baker-scripts/StarrScripts](https://github.com/baker-scripts/StarrScripts) — includes `qui-xseed.sh` for cross-seed automation
-- [TRaSH-/qui_workflows](https://github.com/TRaSH-/qui_workflows) — TRaSH's tier-based reference implementation
+- [baker-scripts/StarrScripts](https://github.com/baker-scripts/StarrScripts) includes `qui-xseed.sh` for cross-seed automation.
+- [TRaSH-/qui_workflows](https://github.com/TRaSH-/qui_workflows) is the tier-based reference.
 
 ## Contributing
 
-Issues and pull requests welcome. See the [contributing guidelines](https://github.com/baker-scripts/.github/blob/main/CONTRIBUTING.md); [open an issue](https://github.com/baker-scripts/qui_workflows/issues) to discuss larger changes.
-
-## Contributors
-
-<a href="https://github.com/baker-scripts/qui_workflows/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=baker-scripts/qui_workflows" alt="Contributors" />
-</a>
+Issues and pull requests welcome. See the [contributing guidelines](https://github.com/baker-scripts/.github/blob/main/CONTRIBUTING.md), or [open an issue](https://github.com/baker-scripts/qui_workflows/issues) to discuss larger changes.
 
 ## Disclaimer
 
-These automations are provided as-is with no warranty. They **will delete torrents and files** based on the configured conditions. Always review the JSON conditions before importing and test with `dryRun: true` first. The authors are not responsible for any data loss resulting from the use of these workflows.
+Provided as-is with no warranty. These automations delete torrents and files based on their conditions. Review the JSON before importing. The authors are not responsible for data loss.
 
 ## License
 
