@@ -6,7 +6,25 @@
     "*"
   ],
   "conditions": {
-    "schemaVersion": "1"
+    "schemaVersion": "1",
+    "recheck": {
+      "enabled": true,
+      "condition": {
+        "operator": "AND",
+        "conditions": [
+          {
+            "field": "STATE",
+            "operator": "EQUAL",
+            "value": "missingFiles"
+          },
+          {
+            "field": "LAST_ACTIVITY_AGE",
+            "operator": "LESS_THAN",
+            "value": "86400"
+          }
+        ]
+      }
+    }
   },
   "intervalSeconds": 3600,
   "sortOrder": 8
