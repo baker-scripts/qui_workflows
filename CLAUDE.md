@@ -21,7 +21,6 @@ QUI automation workflows for qBittorrent torrent lifecycle management.
 
 ## Known Live Drift (as of 2026-06-21)
 
-Live instance predates some repo improvements. Two automations differ:
+Live instance differs from the repo on one automation:
 
 1. **HL-remove-limits** — live has `intervalSeconds: null` (explicit null); repo omits the field (equivalent — both mean "use qui default interval"). No action needed.
-2. **Recheck: missing files** — live has an old-style explicit `forceRecheck` condition (`STATE = missingFiles`); repo has intentionally empty conditions (the correct newer form per qui's built-in recheck action). Live instance should be updated to match repo when convenient.

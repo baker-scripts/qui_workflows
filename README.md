@@ -59,7 +59,7 @@ Tagging and maintenance:
 | 5 | Tag: stalledDL | 30 min | Tag `stalledDL` for stalled downloads |
 | 6 | Tag: tracker issue | 30 min | Tag `issue` for errored, tracker-down, or missing-files states |
 | 7 | Delete: unregistered | 15 min | Delete unregistered torrents when added 90+ minutes ago and the tracker is not down |
-| 8 | Recheck: missing files | 1 h | Built-in qui recheck action. Empty conditions are intentional. |
+| 8 | Recheck: missing files | 1 h | Recheck torrents in `missingFiles` state with activity in the last 24 h |
 
 Limits:
 
