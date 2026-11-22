@@ -14,9 +14,9 @@ QUI automation workflows for qBittorrent torrent lifecycle management.
 
 ## Live Instance
 
-- Container: `qui.internal` (ghcr.io/hotio/qui) on hetzner, port 7476
+- Container: `<qui-container>` (ghcr.io/hotio/qui) on the docker host, port 7476
 - Auth: OIDC-only (`QUI__OIDC_DISABLE_BUILT_IN_LOGIN=true`) — no built-in username/password login; API keys are still generated via the UI (see below)
-- Published by a running [qui-sync](https://github.com/ProphetSe7en/qui-sync) instance (`qui-sync.internal` on hetzner, 127.0.0.1:6070 only, no public vhost) — not a manual script. `scripts/export.sh` is retired (removed 2026-07-17).
+- Published by a running [qui-sync](https://github.com/ProphetSe7en/qui-sync) instance (`<qui-sync-container>` on the docker host, 127.0.0.1:6070 only, no public vhost) — not a manual script. `scripts/export.sh` is retired (removed 2026-07-17).
 - Predecessor repo `bakerboy448/qui-automations` is archived; this repo is canonical
 
 ## Known Live Drift (as of 2026-06-21)
